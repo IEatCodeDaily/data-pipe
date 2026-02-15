@@ -93,6 +93,8 @@ CREATE TABLE users (
 
 ### Step 6: Test the Pipeline
 
+**Important Note**: The pipeline only syncs **new changes** after it starts. It does NOT sync existing data. See the "Understanding CDC Mode" section below.
+
 Insert a document in MongoDB:
 
 ```bash
@@ -243,6 +245,57 @@ db.users.deleteOne({ email: "john@example.com" })
 ```
 
 All changes will automatically sync to PostgreSQL!
+
+## Understanding CDC Mode
+
+**Important**: This pipeline operates in **Change Data Capture (CDC) mode only**:
+
+### What Gets Synced
+- ✅ Documents created **after** the pipeline starts
+- ✅ Documents updated **after** the pipeline starts
+- ✅ Documents deleted **after** the pipeline starts
+
+### What Does NOT Get Synced
+- ❌ Existing documents in MongoDB before pipeline start
+- ❌ Historical data (no backfill)
+
+### For Initial Data Sync
+
+If you have existing data in MongoDB that needs to be in PostgreSQL:
+
+#### Option 1: Manual Export/Import
+
+```bash
+# Export from MongoDB
+mongoexport --uri="mongodb://localhost:27017" --db=mydb --collection=users --out=users.json
+
+# Import to PostgreSQL (write a custom script)
+# Then start data-pipe for ongoing sync
+```
+
+#### Option 2: Copy Existing Data First
+
+```bash
+# Use mongosh to copy existing documents
+docker exec -it mongodb mongosh --eval "
+use mydb
+db.users.find().forEach(function(doc) {
+  // Manually insert into PostgreSQL first
+})
+"
+
+# Then start the pipeline
+./data-pipe -config config.json
+```
+
+#### Option 3: Start Fresh
+
+```bash
+# Clear both databases and start with new data
+# All new operations will be synced automatically
+```
+
+This is a common CDC pattern - you do a one-time bulk load of existing data, then use CDC for ongoing synchronization.
 
 ## Common Issues
 

@@ -193,6 +193,63 @@ For detailed field mapping options, see [FIELD_MAPPING.md](FIELD_MAPPING.md).
 - **Replace**: Replaces entire documents (upsert)
 - **Delete**: Removes records from PostgreSQL
 
+## How Sync Works
+
+### Change Data Capture (CDC) Only
+
+**Important**: The pipeline currently operates in **CDC-only mode**:
+
+- ✅ Monitors for **new changes** after the pipeline starts
+- ✅ Captures inserts, updates, and deletes in real-time
+- ❌ Does **NOT** perform an initial full sync of existing data
+
+**What this means:**
+- Only documents created/modified/deleted **after** the pipeline starts are synced
+- Pre-existing data in MongoDB is **not** automatically copied to PostgreSQL
+- The pipeline listens to MongoDB's change stream (oplog) from the current point in time
+
+### Initial Data Sync Strategies
+
+For production deployments, you should perform an initial data load before starting the CDC pipeline:
+
+#### Option 1: Manual Bulk Load
+
+```bash
+# Export from MongoDB
+mongoexport --uri="mongodb://localhost:27017" --db=mydb --collection=users --out=users.json
+
+# Import to PostgreSQL (custom script or tool)
+# Then start the CDC pipeline
+./data-pipe -config config.json
+```
+
+#### Option 2: MongoDB Tools
+
+```bash
+# Use mongodump/mongorestore or MongoDB Compass
+mongodump --uri="mongodb://localhost:27017" --db=mydb --collection=users
+
+# Convert and load to PostgreSQL, then start CDC
+```
+
+#### Option 3: Custom Script
+
+Write a one-time script to:
+1. Query all existing documents from MongoDB
+2. Insert them into PostgreSQL
+3. Start the data-pipe for ongoing CDC
+
+### Resume from Specific Point
+
+MongoDB change streams support resume tokens. To replay changes from a specific point in time:
+
+```go
+// Future enhancement - not currently implemented
+opts := options.ChangeStream().SetStartAtOperationTime(&timestamp)
+```
+
+This feature is planned for future releases.
+
 ## Extending the Pipeline
 
 ### Adding a New Source

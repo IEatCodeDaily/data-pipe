@@ -76,6 +76,25 @@ Successfully implemented a complete CDC (Change Data Capture) data pipeline in G
 3. **Batch Processing** - PostgreSQL sink batches events (100 per batch) for performance
 4. **Security First** - Table name validation, parameterized queries, no SQL injection
 5. **Configuration-Driven** - JSON config file for easy customization without code changes
+6. **CDC-Only Mode** - Monitors for new changes only; does not perform initial full sync (by design)
+
+## Sync Behavior
+
+### Change Data Capture (CDC) Only
+
+**Important**: The pipeline operates in CDC-only mode:
+
+- ✅ Captures changes from MongoDB change streams (oplog)
+- ✅ Monitors for insert, update, replace, delete operations
+- ✅ Streams changes in real-time to PostgreSQL
+- ❌ Does NOT perform initial full sync of existing data
+- ❌ Does NOT backfill historical data
+
+**Rationale**: This is a common CDC pattern similar to Debezium, Airbyte, and other CDC tools. For production:
+1. Perform a one-time bulk load of existing data
+2. Start the CDC pipeline for ongoing synchronization
+
+**Future Enhancements**: Initial sync feature could be added as an optional phase.
 
 ## Technical Highlights
 
