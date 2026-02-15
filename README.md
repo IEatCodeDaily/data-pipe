@@ -42,6 +42,39 @@ cd data-pipe
 go build -o data-pipe ./cmd/data-pipe
 ```
 
+### Using Docker
+
+Build and run with Docker:
+
+```bash
+# Build the Docker image
+docker build -t data-pipe .
+
+# Run with your config file
+docker run -v $(pwd)/config.json:/root/config.json data-pipe
+```
+
+### Using Docker Compose
+
+For a complete setup with MongoDB and PostgreSQL:
+
+```bash
+# Start all services
+docker-compose up -d
+
+# View logs
+docker-compose logs -f data-pipe
+
+# Stop all services
+docker-compose down
+```
+
+**Note**: When using docker-compose, you'll need to initialize the MongoDB replica set:
+
+```bash
+docker exec -it mongodb mongosh --eval "rs.initiate()"
+```
+
 ## Configuration
 
 Create a `config.json` file with your source and sink settings:
