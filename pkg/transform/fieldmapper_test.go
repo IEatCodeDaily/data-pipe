@@ -411,7 +411,10 @@ func TestFieldMapperEdgeCases(t *testing.T) {
 			},
 		}
 
-		mapper, _ := NewFieldMapper(config)
+		mapper, err := NewFieldMapper(config)
+		if err != nil {
+			t.Fatalf("Failed to create mapper: %v", err)
+		}
 		event := pipeline.Event{
 			Data: map[string]interface{}{
 				"nullable": nil,
@@ -436,7 +439,10 @@ func TestFieldMapperEdgeCases(t *testing.T) {
 			},
 		}
 
-		mapper, _ := NewFieldMapper(config)
+		mapper, err := NewFieldMapper(config)
+		if err != nil {
+			t.Fatalf("Failed to create mapper: %v", err)
+		}
 		event := pipeline.Event{
 			Data: map[string]interface{}{
 				"empty": "",
@@ -460,7 +466,10 @@ func TestFieldMapperEdgeCases(t *testing.T) {
 			},
 		}
 
-		mapper, _ := NewFieldMapper(config)
+		mapper, err := NewFieldMapper(config)
+		if err != nil {
+			t.Fatalf("Failed to create mapper: %v", err)
+		}
 		event := pipeline.Event{
 			Data: map[string]interface{}{
 				"count": 0,

@@ -136,8 +136,12 @@ func (f *FieldMapper) Transform(event pipeline.Event) (pipeline.Event, error) {
 
 	// Log non-fatal errors if any
 	if len(errors) > 0 && !f.config.StrictMode {
-		// Errors are logged but not returned
-		_ = errors
+		// In a production setting, these would be logged
+		// For now, they are collected but not returned as errors
+		for _, errMsg := range errors {
+			// TODO: Add logger support to FieldMapper for better error visibility
+			_ = errMsg
+		}
 	}
 
 	event.Data = newData
