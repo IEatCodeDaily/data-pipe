@@ -5,11 +5,15 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"regexp"
 	"strings"
 
 	"github.com/IEatCodeDaily/data-pipe/pkg/pipeline"
 	_ "github.com/lib/pq"
 )
+
+// Valid table name pattern (alphanumeric, underscore, max 63 chars for PostgreSQL)
+var validTableName = regexp.MustCompile(`^[a-zA-Z_][a-zA-Z0-9_]{0,62}$`)
 
 // PostgreSQLSink implements the Sink interface for PostgreSQL
 type PostgreSQLSink struct {
@@ -36,6 +40,11 @@ func NewPostgreSQLSink(connStr, table string, logger *log.Logger) *PostgreSQLSin
 // Connect establishes connection to PostgreSQL
 func (p *PostgreSQLSink) Connect(ctx context.Context) error {
 	p.logger.Println("Connecting to PostgreSQL")
+	
+	// Validate table name to prevent SQL injection
+	if !validTableName.MatchString(p.table) {
+		return fmt.Errorf("invalid table name: %s (must be alphanumeric with underscores, starting with letter or underscore)", p.table)
+	}
 	
 	db, err := sql.Open("postgres", p.connStr)
 	if err != nil {

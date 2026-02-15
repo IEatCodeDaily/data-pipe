@@ -30,7 +30,7 @@ MongoDB Change Stream → Events → [Transformer] → PostgreSQL
 
 ### Prerequisites
 
-- Go 1.18 or higher
+- Go 1.20 or higher
 - MongoDB 4.0+ (for change streams support)
 - PostgreSQL 9.5+ (for upsert support)
 
