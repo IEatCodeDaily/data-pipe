@@ -7,14 +7,14 @@ import (
 
 // Event represents a change data capture event
 type Event struct {
-	ID        string                 `json:"id"`
-	Timestamp time.Time              `json:"timestamp"`
-	Operation string                 `json:"operation"` // insert, update, delete
-	Source    string                 `json:"source"`
-	Database  string                 `json:"database"`
-	Collection string                `json:"collection"`
-	Data      map[string]interface{} `json:"data"`
-	Before    map[string]interface{} `json:"before,omitempty"` // for updates
+	ID         string                 `json:"id"`
+	Timestamp  time.Time              `json:"timestamp"`
+	Operation  string                 `json:"operation"` // insert, update, delete
+	Source     string                 `json:"source"`
+	Database   string                 `json:"database"`
+	Collection string                 `json:"collection"`
+	Data       map[string]interface{} `json:"data"`
+	Before     map[string]interface{} `json:"before,omitempty"` // for updates
 }
 
 // Source defines the interface for data sources

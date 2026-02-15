@@ -37,7 +37,7 @@ func NewMongoDBSource(uri, database, collection string, logger *log.Logger) *Mon
 // Connect establishes connection to MongoDB
 func (m *MongoDBSource) Connect(ctx context.Context) error {
 	m.logger.Printf("Connecting to MongoDB: %s", m.uri)
-	
+
 	clientOptions := options.Client().ApplyURI(m.uri)
 	client, err := mongo.Connect(ctx, clientOptions)
 	if err != nil {
@@ -64,11 +64,11 @@ func (m *MongoDBSource) Read(ctx context.Context) (<-chan pipeline.Event, <-chan
 		defer close(errors)
 
 		collection := m.client.Database(m.database).Collection(m.collection)
-		
+
 		// Create a change stream
 		pipeline := mongo.Pipeline{}
 		opts := options.ChangeStream().SetFullDocument(options.UpdateLookup)
-		
+
 		m.logger.Printf("Starting change stream for %s.%s", m.database, m.collection)
 		stream, err := collection.Watch(ctx, pipeline, opts)
 		if err != nil {

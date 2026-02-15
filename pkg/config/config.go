@@ -8,9 +8,10 @@ import (
 
 // Config represents the pipeline configuration
 type Config struct {
-	Pipeline PipelineConfig `json:"pipeline"`
-	Source   SourceConfig   `json:"source"`
-	Sink     SinkConfig     `json:"sink"`
+	Pipeline    PipelineConfig    `json:"pipeline"`
+	Source      SourceConfig      `json:"source"`
+	Sink        SinkConfig        `json:"sink"`
+	Transformer TransformerConfig `json:"transformer,omitempty"`
 }
 
 // PipelineConfig contains pipeline-level settings
@@ -27,6 +28,12 @@ type SourceConfig struct {
 // SinkConfig contains sink configuration
 type SinkConfig struct {
 	Type     string                 `json:"type"` // postgresql, clickhouse, etc.
+	Settings map[string]interface{} `json:"settings"`
+}
+
+// TransformerConfig contains transformer configuration
+type TransformerConfig struct {
+	Type     string                 `json:"type"` // passthrough, fieldmapper, etc.
 	Settings map[string]interface{} `json:"settings"`
 }
 
@@ -59,4 +66,20 @@ func (s SinkConfig) GetString(key string) string {
 		return val
 	}
 	return ""
+}
+
+// GetString safely retrieves a string from settings
+func (t TransformerConfig) GetString(key string) string {
+	if val, ok := t.Settings[key].(string); ok {
+		return val
+	}
+	return ""
+}
+
+// GetBool safely retrieves a bool from settings
+func (t TransformerConfig) GetBool(key string) bool {
+	if val, ok := t.Settings[key].(bool); ok {
+		return val
+	}
+	return false
 }

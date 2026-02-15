@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"log"
@@ -54,7 +55,41 @@ func main() {
 	}
 
 	// Create transformer
-	transformer := transform.NewPassThroughTransformer()
+	var transformer pipeline.Transformer
+	
+	if cfg.Transformer.Type != "" {
+		switch cfg.Transformer.Type {
+		case "fieldmapper":
+			// Parse field mapper configuration
+			if _, ok := cfg.Transformer.Settings["mappings"]; !ok {
+				logger.Fatalf("fieldmapper transformer requires 'mappings' configuration")
+			}
+			
+			// Convert settings to JSON and parse into FieldMapperConfig
+			settingsJSON, err := json.Marshal(cfg.Transformer.Settings)
+			if err != nil {
+				logger.Fatalf("Failed to marshal transformer settings: %v", err)
+			}
+			
+			var fmConfig transform.FieldMapperConfig
+			if err := json.Unmarshal(settingsJSON, &fmConfig); err != nil {
+				logger.Fatalf("Failed to parse fieldmapper configuration: %v", err)
+			}
+			
+			fm, err := transform.NewFieldMapper(fmConfig)
+			if err != nil {
+				logger.Fatalf("Failed to create field mapper: %v", err)
+			}
+			transformer = fm
+		case "passthrough":
+			transformer = transform.NewPassThroughTransformer()
+		default:
+			logger.Fatalf("Unsupported transformer type: %s", cfg.Transformer.Type)
+		}
+	} else {
+		// Default to passthrough if no transformer configured
+		transformer = transform.NewPassThroughTransformer()
+	}
 
 	// Create pipeline
 	pipe := pipeline.New(cfg.Pipeline.Name, src, snk, transformer, logger)

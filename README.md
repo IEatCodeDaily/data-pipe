@@ -7,6 +7,7 @@ A lightweight, standalone Change Data Capture (CDC) pipeline written in Go for s
 - **Pure Go Implementation**: No external dependencies like Kafka required
 - **MongoDB Change Streams**: Real-time CDC from MongoDB using native change streams
 - **PostgreSQL Sink**: Efficient batch writes to PostgreSQL with upsert support
+- **Field Mapping & Transformation**: Rename, format, and filter fields with powerful field mapper
 - **Extensible Architecture**: Easy to add new sources (Convex, etc.) and sinks (ClickHouse, etc.)
 - **Graceful Shutdown**: Properly handles SIGTERM and SIGINT signals
 - **Configurable**: JSON-based configuration for easy setup
@@ -115,6 +116,29 @@ Create a `config.json` file with your source and sink settings:
 #### PostgreSQL Sink Settings
 - `connection_string`: PostgreSQL connection string
 - `table`: Target table name
+
+#### Transformer Settings (Optional)
+- `type`: Transformer type (`passthrough` or `fieldmapper`)
+- `settings`: Transformer-specific configuration
+
+For detailed field mapping options, see [FIELD_MAPPING.md](FIELD_MAPPING.md).
+
+**Field Mapping Example:**
+
+```json
+{
+  "transformer": {
+    "type": "fieldmapper",
+    "settings": {
+      "mappings": [
+        {"source": "firstName", "destination": "first_name"},
+        {"source": "email", "format": "lowercase"}
+      ],
+      "include_all": false
+    }
+  }
+}
+```
 
 ## Usage
 

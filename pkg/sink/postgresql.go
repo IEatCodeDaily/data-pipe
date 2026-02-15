@@ -17,11 +17,11 @@ var validTableName = regexp.MustCompile(`^[a-zA-Z_][a-zA-Z0-9_]{0,62}$`)
 
 // PostgreSQLSink implements the Sink interface for PostgreSQL
 type PostgreSQLSink struct {
-	connStr    string
-	table      string
-	db         *sql.DB
-	logger     *log.Logger
-	batchSize  int
+	connStr   string
+	table     string
+	db        *sql.DB
+	logger    *log.Logger
+	batchSize int
 }
 
 // NewPostgreSQLSink creates a new PostgreSQL sink
@@ -40,12 +40,12 @@ func NewPostgreSQLSink(connStr, table string, logger *log.Logger) *PostgreSQLSin
 // Connect establishes connection to PostgreSQL
 func (p *PostgreSQLSink) Connect(ctx context.Context) error {
 	p.logger.Println("Connecting to PostgreSQL")
-	
+
 	// Validate table name to prevent SQL injection
 	if !validTableName.MatchString(p.table) {
 		return fmt.Errorf("invalid table name: %s (must be alphanumeric with underscores, starting with letter or underscore)", p.table)
 	}
-	
+
 	db, err := sql.Open("postgres", p.connStr)
 	if err != nil {
 		return fmt.Errorf("failed to connect to PostgreSQL: %w", err)
@@ -69,10 +69,10 @@ func (p *PostgreSQLSink) Write(ctx context.Context, events <-chan pipeline.Event
 		defer close(errors)
 
 		batch := make([]pipeline.Event, 0, p.batchSize)
-		
+
 		for event := range events {
 			batch = append(batch, event)
-			
+
 			if len(batch) >= p.batchSize {
 				if err := p.writeBatch(ctx, batch); err != nil {
 					errors <- err
@@ -102,7 +102,11 @@ func (p *PostgreSQLSink) writeBatch(ctx context.Context, events []pipeline.Event
 	if err != nil {
 		return fmt.Errorf("failed to begin transaction: %w", err)
 	}
-	defer tx.Rollback()
+	defer func() {
+		if rbErr := tx.Rollback(); rbErr != nil && rbErr != sql.ErrTxDone {
+			p.logger.Printf("Warning: failed to rollback transaction: %v", rbErr)
+		}
+	}()
 
 	for _, event := range events {
 		if err := p.writeEvent(ctx, tx, event); err != nil {
@@ -142,7 +146,7 @@ func (p *PostgreSQLSink) insertEvent(ctx context.Context, tx *sql.Tx, event pipe
 	columns := make([]string, 0, len(event.Data))
 	placeholders := make([]string, 0, len(event.Data))
 	values := make([]interface{}, 0, len(event.Data))
-	
+
 	i := 1
 	for key, value := range event.Data {
 		columns = append(columns, key)
