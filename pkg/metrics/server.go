@@ -97,7 +97,9 @@ func (s *Server) healthHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusServiceUnavailable)
 	}
 	
-	json.NewEncoder(w).Encode(status)
+	if err := json.NewEncoder(w).Encode(status); err != nil {
+		s.logger.Printf("Error encoding health status: %v", err)
+	}
 }
 
 // readinessHandler handles readiness probe requests

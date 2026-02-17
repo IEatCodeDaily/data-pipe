@@ -68,7 +68,7 @@ func (p *Pipeline) GetStatus() HealthStatus {
 	
 	return HealthStatus{
 		Healthy:          p.IsHealthy(),
-		PipelineRunning:  p.sourceConnected && p.sinkConnected,
+		PipelineRunning:  p.IsHealthy(),
 		SourceConnected:  p.sourceConnected,
 		SinkConnected:    p.sinkConnected,
 		LastEventTime:    lastEventTimeStr,
