@@ -1,6 +1,7 @@
 package metrics
 
 import (
+	"fmt"
 	"sync"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -25,15 +26,14 @@ type Metrics struct {
 }
 
 // NewMetrics creates and registers all pipeline metrics
-func NewMetrics(pipelineName string) *Metrics {
+// Returns an error if metrics for this pipeline name are already registered
+func NewMetrics(pipelineName string) (*Metrics, error) {
 	registryMu.Lock()
 	defer registryMu.Unlock()
 
 	// Check if metrics for this pipeline already exist
 	if metricsRegistry[pipelineName] {
-		// Return nil to signal that metrics already exist
-		// Caller should handle this gracefully
-		return nil
+		return nil, fmt.Errorf("metrics for pipeline '%s' already registered", pipelineName)
 	}
 
 	m := &Metrics{
@@ -89,7 +89,7 @@ func NewMetrics(pipelineName string) *Metrics {
 	}
 
 	metricsRegistry[pipelineName] = true
-	return m
+	return m, nil
 }
 
 // RecordEventProcessed records a successfully processed event

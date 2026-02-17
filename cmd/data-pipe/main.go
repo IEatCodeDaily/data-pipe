@@ -106,9 +106,9 @@ func main() {
 		}
 		
 		// Create metrics recorder
-		metricsRecorder := metrics.NewMetrics(cfg.Pipeline.Name)
-		if metricsRecorder == nil {
-			logger.Fatalf("Failed to create metrics: pipeline name '%s' already has metrics registered", cfg.Pipeline.Name)
+		metricsRecorder, err := metrics.NewMetrics(cfg.Pipeline.Name)
+		if err != nil {
+			logger.Fatalf("Failed to create metrics: %v", err)
 		}
 		pipe.SetMetrics(metricsRecorder)
 		

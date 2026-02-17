@@ -57,6 +57,11 @@ func (p *Pipeline) SetMetrics(metrics MetricsRecorder) {
 func (p *Pipeline) IsHealthy() bool {
 	p.mu.RLock()
 	defer p.mu.RUnlock()
+	return p.isHealthyLocked()
+}
+
+// isHealthyLocked returns true if the pipeline is healthy (caller must hold read lock)
+func (p *Pipeline) isHealthyLocked() bool {
 	return p.sourceConnected && p.sinkConnected
 }
 
@@ -72,9 +77,11 @@ func (p *Pipeline) GetStatus() HealthStatus {
 		lastEventTimeStr = p.lastEventTime.Format(time.RFC3339)
 	}
 	
+	healthy := p.isHealthyLocked()
+	
 	return HealthStatus{
-		Healthy:          p.sourceConnected && p.sinkConnected,
-		PipelineRunning:  p.sourceConnected && p.sinkConnected,
+		Healthy:          healthy,
+		PipelineRunning:  healthy,
 		SourceConnected:  p.sourceConnected,
 		SinkConnected:    p.sinkConnected,
 		LastEventTime:    lastEventTimeStr,

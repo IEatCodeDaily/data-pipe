@@ -62,6 +62,12 @@ func NewServer(addr string, health HealthChecker, logger *log.Logger) *Server {
 	return s
 }
 
+const (
+	// serverStartupTimeout is the duration to wait when starting the server
+	// to catch immediate errors like port already in use
+	serverStartupTimeout = 100 * time.Millisecond
+)
+
 // Start starts the HTTP server
 func (s *Server) Start() error {
 	s.logger.Printf("Starting metrics server on %s", s.server.Addr)
@@ -79,7 +85,7 @@ func (s *Server) Start() error {
 	select {
 	case err := <-errChan:
 		return fmt.Errorf("failed to start server: %w", err)
-	case <-time.After(100 * time.Millisecond):
+	case <-time.After(serverStartupTimeout):
 		// Server started successfully
 		return nil
 	}

@@ -22,7 +22,11 @@ func TestNewMetrics(t *testing.T) {
 		registryMu.Unlock()
 	}()
 	
-	m := NewMetrics("test-pipeline-new")
+	m, err := NewMetrics("test-pipeline-new")
+	
+	if err != nil {
+		t.Fatalf("Failed to create metrics: %v", err)
+	}
 	
 	if m == nil {
 		t.Fatal("Expected metrics to be created")
@@ -65,7 +69,11 @@ func TestRecordEventProcessed(t *testing.T) {
 		registryMu.Unlock()
 	}()
 	
-	m := NewMetrics("test-pipeline-events")
+	m, err := NewMetrics("test-pipeline-events")
+	
+	if err != nil {
+		t.Fatalf("Failed to create metrics: %v", err)
+	}
 	
 	if m == nil {
 		t.Fatal("Expected metrics to be created")
@@ -94,7 +102,11 @@ func TestRecordEventError(t *testing.T) {
 		registryMu.Unlock()
 	}()
 	
-	m := NewMetrics("test-pipeline-errors")
+	m, err := NewMetrics("test-pipeline-errors")
+	
+	if err != nil {
+		t.Fatalf("Failed to create metrics: %v", err)
+	}
 	
 	if m == nil {
 		t.Fatal("Expected metrics to be created")
@@ -122,7 +134,11 @@ func TestSetPipelineRunning(t *testing.T) {
 		registryMu.Unlock()
 	}()
 	
-	m := NewMetrics("test-pipeline-running")
+	m, err := NewMetrics("test-pipeline-running")
+	
+	if err != nil {
+		t.Fatalf("Failed to create metrics: %v", err)
+	}
 	
 	if m == nil {
 		t.Fatal("Expected metrics to be created")
@@ -146,7 +162,11 @@ func TestSetSourceConnected(t *testing.T) {
 		registryMu.Unlock()
 	}()
 	
-	m := NewMetrics("test-pipeline-source")
+	m, err := NewMetrics("test-pipeline-source")
+	
+	if err != nil {
+		t.Fatalf("Failed to create metrics: %v", err)
+	}
 	
 	if m == nil {
 		t.Fatal("Expected metrics to be created")
@@ -168,7 +188,11 @@ func TestSetSinkConnected(t *testing.T) {
 		registryMu.Unlock()
 	}()
 	
-	m := NewMetrics("test-pipeline-sink")
+	m, err := NewMetrics("test-pipeline-sink")
+	
+	if err != nil {
+		t.Fatalf("Failed to create metrics: %v", err)
+	}
 	
 	if m == nil {
 		t.Fatal("Expected metrics to be created")
@@ -190,7 +214,11 @@ func TestRecordProcessingDuration(t *testing.T) {
 		registryMu.Unlock()
 	}()
 	
-	m := NewMetrics("test-pipeline-duration")
+	m, err := NewMetrics("test-pipeline-duration")
+	
+	if err != nil {
+		t.Fatalf("Failed to create metrics: %v", err)
+	}
 	
 	if m == nil {
 		t.Fatal("Expected metrics to be created")
