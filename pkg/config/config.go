@@ -16,8 +16,16 @@ type Config struct {
 
 // PipelineConfig contains pipeline-level settings
 type PipelineConfig struct {
-	Name string     `json:"name"`
-	Sync SyncConfig `json:"sync,omitempty"`
+	Name    string        `json:"name"`
+	Sync    SyncConfig    `json:"sync,omitempty"`
+	Metrics MetricsConfig `json:"metrics,omitempty"`
+}
+
+// MetricsConfig contains metrics and monitoring settings
+type MetricsConfig struct {
+	Enabled bool   `json:"enabled"` // Enable metrics endpoint
+	Port    int    `json:"port"`    // Port for metrics server (default: 2112)
+	Path    string `json:"path"`    // Path for metrics endpoint (default: /metrics)
 }
 
 // SyncConfig contains synchronization settings
