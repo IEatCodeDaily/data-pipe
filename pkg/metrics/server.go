@@ -114,10 +114,14 @@ func (s *Server) readinessHandler(w http.ResponseWriter, r *http.Request) {
 	
 	if status.SourceConnected && status.SinkConnected {
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("ready"))
+		if _, err := w.Write([]byte("ready")); err != nil {
+			s.logger.Printf("Error writing readiness response: %v", err)
+		}
 	} else {
 		w.WriteHeader(http.StatusServiceUnavailable)
-		w.Write([]byte("not ready"))
+		if _, err := w.Write([]byte("not ready")); err != nil {
+			s.logger.Printf("Error writing readiness response: %v", err)
+		}
 	}
 }
 
@@ -140,5 +144,7 @@ func (s *Server) rootHandler(w http.ResponseWriter, r *http.Request) {
 </body>
 </html>
 `
-	w.Write([]byte(html))
+	if _, err := w.Write([]byte(html)); err != nil {
+		s.logger.Printf("Error writing root response: %v", err)
+	}
 }
