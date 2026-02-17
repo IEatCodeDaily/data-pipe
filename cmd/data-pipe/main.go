@@ -153,9 +153,10 @@ func performInitialSync(ctx context.Context, cfg *config.Config, src pipeline.So
 
 	// Determine initial sync strategy
 	var fromTimestamp interface{}
-	syncAll := cfg.Pipeline.Sync.ForceInitialSync
 
-	if !syncAll && cfg.Pipeline.Sync.TimestampField != "" {
+	if cfg.Pipeline.Sync.ForceInitialSync {
+		logger.Println("Force initial sync is enabled, syncing all data")
+	} else if cfg.Pipeline.Sync.TimestampField != "" {
 		// Check if sink table is empty
 		isEmpty, err := pgSink.IsTableEmpty(ctx)
 		if err != nil {
@@ -164,24 +165,21 @@ func performInitialSync(ctx context.Context, cfg *config.Config, src pipeline.So
 
 		if isEmpty {
 			logger.Println("Sink table is empty, performing full initial sync")
-			syncAll = true
 		} else {
 			// Get latest timestamp from sink
 			ts, err := pgSink.GetLatestTimestamp(ctx, cfg.Pipeline.Sync.TimestampField)
 			if err != nil {
 				logger.Printf("Warning: failed to get latest timestamp from sink: %v", err)
 				logger.Println("Falling back to full initial sync")
-				syncAll = true
 			} else if ts != nil {
 				fromTimestamp = ts
 				logger.Printf("Starting incremental initial sync from timestamp: %v", fromTimestamp)
 			} else {
 				logger.Println("No timestamp found in sink, performing full initial sync")
-				syncAll = true
 			}
 		}
-	} else if syncAll {
-		logger.Println("Force initial sync is enabled, syncing all data")
+	} else {
+		logger.Println("No timestamp field configured, performing full initial sync")
 	}
 
 	// Prepare initial sync config
